@@ -82,23 +82,6 @@ def explode_next(n):
         exploding_pair.right.number_at_right.number_at_left = new_zero
         new_zero.number_at_right = exploding_pair.right.number_at_right
     
-    # child_cursor = exploding_pair
-    # parent_cursor = exploding_pair.parent
-    # while parent_cursor != None and parent_cursor.right != child_cursor:
-    #     parent_cursor = parent_cursor.parent
-    #     child_cursor = parent_cursor
-    # if parent_cursor != None:
-    #     increment_rightmost_child_of_left(parent_cursor, exploding_pair.left)
-    
-    # # Transfer the right value to the right
-    # child_cursor = exploding_pair
-    # parent_cursor = exploding_pair.parent
-    # while parent_cursor != None and parent_cursor.left != child_cursor:
-    #     parent_cursor = parent_cursor.parent
-    #     child_cursor = parent_cursor
-    # if parent_cursor != None:
-    #     increment_leftmost_child_of_right(parent_cursor, exploding_pair.right)
-    
     # Actually replace marker with 0
     if parent.left == exploding_pair:
         parent.left = new_zero
@@ -106,22 +89,6 @@ def explode_next(n):
         parent.right = new_zero
     
     return n
-        
-# def increment_rightmost_child_of_left(n, increment_by):
-#     if isinstance(n.left, RegularNumber):
-#         n.left.value += increment_by
-#     else:
-#         target = n.left
-#         while isinstance(target.right, Pair): target = target.right
-#         target.right += increment_by
-        
-# def increment_leftmost_child_of_right(n, increment_by):
-#     if isinstance(n.right, RegularNumber):
-#         n.right.value += increment_by
-#     else:
-#         target = n.right
-#         while isinstance(target.left, Pair): target = target.left
-#         target.left += increment_by
     
 def find_first_exploding_pair(n, current_depth):
     print("Testing %s at depth %s" % (n, current_depth))
