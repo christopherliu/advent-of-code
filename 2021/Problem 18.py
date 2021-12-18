@@ -287,6 +287,7 @@ for i in range(2, len(snailfish_number)):
 print(sum)
 print(sum.get_magnitude())
 
+# Part 2
 print(max([
     max([add_snailfish_numbers(make_snailfish_number(x1), make_snailfish_number(x2)).get_magnitude() for x1 in snailfish_number_base])
     for x2 in snailfish_number_base
