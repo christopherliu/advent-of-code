@@ -62,13 +62,13 @@ def add_snailfish_numbers(n1, n2):
 def explode_next(n):
     exploding_pair = find_first_exploding_pair(n, 0)
     if not exploding_pair:
-        print("No exploding pair found")
+        #print("No exploding pair found")
         return None
     
     # Find marker to replace with 0
     parent = exploding_pair.parent
     new_zero = RegularNumber(0)
-    new_zero = parent
+    new_zero.parent = parent
         
     # Transfer the left value to the left
     if exploding_pair.left.number_at_left:
@@ -91,7 +91,7 @@ def explode_next(n):
     return n
     
 def find_first_exploding_pair(n, current_depth):
-    print("Testing %s at depth %s" % (n, current_depth))
+    #print("Testing %s at depth %s" % (n, current_depth))
     if isinstance(n, RegularNumber):
         return False
     elif current_depth == 3:
@@ -251,7 +251,7 @@ snailfish_number_raw="""[[[5,3],[[8,6],[7,1]]],[8,0]]
 [[5,[[3,5],[9,2]]],[[[2,2],3],[[4,7],3]]]
 [[[7,8],8],2]
 [9,[2,1]]"""
-snailfish_number_raw = """[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
+snailfish_number_rawx = """[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
 [[[5,[2,8]],4],[5,[[9,9],0]]]
 [6,[[[6,2],[5,6]],[[7,6],[4,7]]]]
 [[[6,[0,7]],[0,9]],[4,[9,[9,0]]]]
@@ -261,7 +261,7 @@ snailfish_number_raw = """[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
 [[9,3],[[9,9],[6,[4,9]]]]
 [[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]
 [[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]"""
-snailfish_number_raw = """[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
+snailfish_number_rawx = """[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
 [7,[[[3,7],[4,3]],[[6,3],[8,8]]]]
 [[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]]
 [[[[2,4],7],[6,[0,5]]],[[[6,8],[2,8]],[[2,1],[4,5]]]]
@@ -273,6 +273,7 @@ snailfish_number_raw = """[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
 [[[[4,2],2],6],[8,7]]"""
 
 #UNSAFE
+snailfish_number_base = [eval(line) for line in snailfish_number_raw.splitlines()]
 snailfish_number = [make_snailfish_number(eval(line)) for line in snailfish_number_raw.splitlines()]
 
 sum = add_snailfish_numbers(snailfish_number[0], snailfish_number[1])
@@ -282,5 +283,11 @@ for i in range(2, len(snailfish_number)):
     print("Added: %s" % (snailfish_number[i]))
     print("The sum is currently: %s" % (sum))
 
+# Part 1
 print(sum)
 print(sum.get_magnitude())
+
+print(max([
+    max([add_snailfish_numbers(make_snailfish_number(x1), make_snailfish_number(x2)).get_magnitude() for x1 in snailfish_number_base])
+    for x2 in snailfish_number_base
+    ]))
