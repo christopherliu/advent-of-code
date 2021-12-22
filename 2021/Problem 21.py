@@ -110,7 +110,7 @@ class ProbabilisticGameState():
         return len(self.game_distribution) == 0
         
 state = ProbabilisticGameState(10, 2)
-state = ProbabilisticGameState(4, 8)
+#state = ProbabilisticGameState(4, 8)
 while not state.all_games_are_finished():
     state.turn()
 print (state.p1_wins, state.p2_wins)
