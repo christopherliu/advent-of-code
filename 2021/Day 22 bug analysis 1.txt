@@ -1,0 +1,25 @@
+=====First intersector
+(-10, 0) x (-46, -45) x (11, 25) True
+found in one of the rechopped existing regions region_to_recalculate
+'(-10, 0) x (-46, -36) x (11, 25) True'
+intersecting with new_region
+'(-12, 0) x (-44, -36) x (11, 30) True'
+which came out of region_to_merge:
+'(-31, 15) x (-49, -1) x (-18, 30) True'
+
+=====Second intersector
+'(-10, 0) x (-45, -36) x (11, 25) True'
+found in one of the rechopped existing regions region_to_recalculate
+'(-10, 0) x (-46, -36) x (11, 25) True'
+intersecting with new_region
+'(-12, 15) x (-49, -46) x (2, 30) True'
+which came out of region_to_merge:
+'(-31, 15) x (-49, -1) x (-18, 30) True'
+
+the problem:
+1) We divide new_region into multiple parts
+2) When we add each of those parts in a loop to region_to_recalculate
+3) We add the same regions of region_to_recalculate to rechopped_older_regions repeatedly.
+
+the fix:
+change region_to_recalculate every time we add any of the parts of new_region.
