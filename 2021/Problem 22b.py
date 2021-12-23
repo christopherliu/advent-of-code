@@ -1,6 +1,5 @@
 import itertools
 
-
 class RegionV2():
     def __init__(self, x_start, x_end, y_start, y_end, z_start, z_end, is_on):
         self.x_start = x_start
@@ -40,28 +39,11 @@ class RegionV2():
     def list_str(cls, regions):
         return "\n".join(str(r) for r in sorted(regions, key=lambda region: (region.x_start, region.x_end, region.y_start, region.y_end, region.z_start, region.z_end, region.is_on)))
 
-    @classmethod
-    def find_overlap_volume(cls, region1, region2):
-        (existing_x_ranges, new_x_ranges, overlapping_x_ranges) = separate_into_new_ranges(
-            region1.x_start, region1.x_end, region2.x_start, region2.x_end)
-        (existing_y_ranges, new_y_ranges, overlapping_y_ranges) = separate_into_new_ranges(
-            region1.y_start, region1.y_end, region2.y_start, region2.y_end)
-        (existing_z_ranges, new_z_ranges, overlapping_z_ranges) = separate_into_new_ranges(
-            region1.z_start, region1.z_end, region2.z_start, region2.z_end)
-
-        return sum([RegionV2.make(xr, yr, zr, region1.is_on).get_volume()
-                    for xr, yr, zr in itertools.product(overlapping_x_ranges,
-                                                        overlapping_y_ranges,
-                                                        overlapping_z_ranges)
-                    if xr[1] >= xr[0] and yr[1] >= yr[0] and zr[1] >= zr[0]])
-
-
 def overlaps(region1, region2):
     # Returns true if 2 regions overlap
     return ((region2.x_start <= region1.x_end and region2.x_end >= region1.x_start)
             and (region2.y_start <= region1.y_end and region2.y_end >= region1.y_start)
             and (region2.z_start <= region1.z_end and region2.z_end >= region1.z_start))
-
 
 def separate_into_new_ranges(existing_start, existing_end, new_start, new_end):
     existing_ranges = []
@@ -97,9 +79,6 @@ def separate_into_new_ranges(existing_start, existing_end, new_start, new_end):
             overlapping_ranges.append((new_start, existing_end))
             new_ranges.append((existing_end + 1, new_end))
     return (existing_ranges, new_ranges, overlapping_ranges)
-
-# '(-45, 0) x (-44, 9) x (-39, 10) True' , '(-22, 26) x (-21, 25) x (-2, 43) True'
-
 
 def apply_new_region(existing_regions, region_to_add):
     # existing_regions: a non-overlapping set of regions
@@ -148,15 +127,6 @@ def apply_new_region(existing_regions, region_to_add):
                                       for xr, yr, zr in itertools.chain(itertools.product(new_x_ranges, new_y_ranges, new_z_ranges), itertools.product(new_x_ranges, new_y_ranges, overlapping_z_ranges), itertools.product(new_x_ranges, overlapping_y_ranges, new_z_ranges), itertools.product(overlapping_x_ranges, new_y_ranges, new_z_ranges), itertools.product(new_x_ranges, overlapping_y_ranges, overlapping_z_ranges), itertools.product(overlapping_x_ranges, overlapping_y_ranges, new_z_ranges), itertools.product(overlapping_x_ranges, new_y_ranges, overlapping_z_ranges))
                                       if xr[1] >= xr[0] and yr[1] >= yr[0] and zr[1] >= zr[0]])
 
-            # if len([1 for region in rechopped_existing_regions if region.__eq__(RegionV2(-10, 0, -46, -45, 11, 25, True))]) > 0:
-            #     print("Found one of the suspect regions")
-            # if len([1 for region in rechopped_existing_regions if region.__eq__(RegionV2(-10, 0, -45, -36, 11, 25, True))]) > 0:
-            #     print("Found one of the suspect regions")
-            # if len([1 for region in final_new_regions if region.__eq__(RegionV2(-10, 0, -46, -45, 11, 25, True))]) > 0:
-            #     print("Found one of the suspect regions")
-            # if len([1 for region in final_new_regions if region.__eq__(RegionV2(-10, 0, -45, -36, 11, 25, True))]) > 0:
-            #     print("Found one of the suspect regions")
-
         new_regions = list(set(final_new_regions))
         if debug:
             print("*Ending new regions:\n%s" % RegionV2.list_str(new_regions))
@@ -168,25 +138,6 @@ def apply_new_region(existing_regions, region_to_add):
         print("*Ending rechopped regions:\n%s" %
               RegionV2.list_str(rechopped_existing_regions))
     return (new_regions, rechopped_existing_regions)
-
-
-def contains(containing_region, region):
-    return (containing_region != region and (containing_region.x_start <= region.x_start and region.x_end <= containing_region.x_end)
-            and (containing_region.y_start <= region.y_start and region.y_end <= containing_region.y_end)
-            and (containing_region.z_start <= region.z_start and region.z_end <= containing_region.z_end))
-
-
-def remove_nested_regions(set_of_regions):
-    # There shouldn't be nested regions, but I'm too lazy to figure out why there are. Instead we're removing them.
-    final_regions = []
-    for region in set_of_regions:
-        if not next((True for containing_region in set_of_regions if contains(containing_region, region)), None):
-            final_regions.append(region)
-    return final_regions
-
-# print(remove_nested_regions(set([RegionV2(2,26,-36,-30,-47,-39,True),
-#                                  RegionV2(-20,-36,-30,-47,-39,True)])))
-
 
 def find_cube_on_count(input_regions):
     print("Starting with %s overlapping regions" % len(input_regions))
@@ -228,26 +179,10 @@ def find_cube_on_count(input_regions):
         nonoverlapping_regions.extend([nr for nr in new_regions if nr.is_on])
         nonoverlapping_regions.extend(
             [r for r in rechopped_older_regions if r.is_on])
-        print("Compressing existing %s regions" % len(nonoverlapping_regions))
-        nonoverlapping_regions = remove_nested_regions(
-            set(nonoverlapping_regions))
-        print("%s regions after compression" % len(nonoverlapping_regions))
-        print("New volume: %s" % sum([region.get_volume() for region in nonoverlapping_regions]))
 
     print("%s distinct regions found" % len(nonoverlapping_regions))
-    # nonoverlapping_regions.sort(lambda region: (region.x_start, region.y_start, region.z_start))
-
-    total_overlap_volume = 0
-    for x, y in itertools.combinations(nonoverlapping_regions, 2):
-        if overlaps(x, y):
-            volume = RegionV2.find_overlap_volume(x, y)
-            total_overlap_volume += volume
-            print("Overlap found: volume %s\n%s\n%s" % (volume, x, y))
-    print("Overlap check complete")
 
     print(sum([region.get_volume() for region in nonoverlapping_regions]))
-    print(total_overlap_volume)
-
 
 def parseline(line):
     on_off, coords = line.split(" ")
@@ -257,12 +192,12 @@ def parseline(line):
     [z_start, z_end] = [int(i) for i in z.split("=")[1].split("..")]
     return RegionV2(x_start, x_end, y_start, y_end, z_start, z_end, on_off == "on")
 
-
 def readfile(filename="Day 22 sample input 2.txt"):
     return [parseline(line) for line in open(filename, "r").readlines()]
 
+#############################################################
 
-# input = readfile("Day 22 sample input 1.txt")
+input = readfile("Day 22 sample input 1.txt")
 # find_cube_on_count(input)  # should be 39 for sample input 1
 
 input = readfile("Day 22 input 1.txt")
@@ -270,7 +205,7 @@ input = readfile("Day 22 input 1.txt")
 # find_cube_on_count(input[0:20]) # should be 543306 for input 1
 find_cube_on_count(input)
 
-# input = readfile("Day 22 sample input 2.txt")
+input = readfile("Day 22 sample input 2.txt")
 # find_cube_on_count(input) # should be 590784 for input 2
 
 input = readfile("Day 22 sample input 2.txt")
