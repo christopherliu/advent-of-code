@@ -36,9 +36,9 @@ class MONAD():
             elif instruction.name == "mul":
                 self.variables[instruction.argA] *= self.get(instruction.argB)
             elif instruction.name == "div":
-                self.variables[instruction.argA] /= self.get(instruction.argB)
+                self.variables[instruction.argA] //= self.get(instruction.argB)
             elif instruction.name == "mod":
-                self.variables[instruction.argA] /= self.get(instruction.argB)
+                self.variables[instruction.argA] %= self.get(instruction.argB)
             elif instruction.name == "eql":
                 self.variables[instruction.argA] = 1 if self.variables[instruction.argA] == self.get(instruction.argB) else 0
         
@@ -49,11 +49,12 @@ class MONAD():
             return int(value)
                 
     def run_as_abstraction(self):
+        # Baby's first optimizing compiler
         self.abstract_variables = {
-            "w": "0",
-            "x": "0",
-            "y": "0",
-            "z": "0",
+            "w": 0,
+            "x": 0,
+            "y": 0,
+            "z": 0,
         }
         
         cursor = 0
@@ -62,15 +63,48 @@ class MONAD():
                 self.abstract_variables[instruction.argA] = "X%s" % cursor
                 cursor += 1
             elif instruction.name == "add":
-                self.abstract_variables[instruction.argA] = "(%s+%s)" % (self.abstract_variables[instruction.argA], self.get_abstraction(instruction.argB))
+                if self.get_abstraction(instruction.argB) == 0:
+                    continue
+                elif self.abstract_variables[instruction.argA] == 0:
+                    self.abstract_variables[instruction.argA] = self.get_abstraction(instruction.argB)
+                    continue
+                elif isinstance(self.abstract_variables[instruction.argA], int) and isinstance(self.get_abstraction(instruction.argB), int):
+                    self.abstract_variables[instruction.argA] += self.get_abstraction(instruction.argB)
+                else:
+                    self.abstract_variables[instruction.argA] = "(%s+%s)" % (self.abstract_variables[instruction.argA], self.get_abstraction(instruction.argB))
             elif instruction.name == "mul":
-                self.abstract_variables[instruction.argA] = "(%s*%s)" % (self.abstract_variables[instruction.argA], self.get_abstraction(instruction.argB))
+                if self.abstract_variables[instruction.argA] == 0 or self.get_abstraction(instruction.argB) == 0:
+                    self.abstract_variables[instruction.argA] = 0
+                    continue
+                elif self.get_abstraction(instruction.argB) == 1:
+                    continue
+                elif isinstance(self.abstract_variables[instruction.argA], int) and isinstance(self.get_abstraction(instruction.argB), int):
+                    self.abstract_variables[instruction.argA] *= self.get_abstraction(instruction.argB)
+                else:
+                    self.abstract_variables[instruction.argA] = "(%s*%s)" % (self.abstract_variables[instruction.argA], self.get_abstraction(instruction.argB))
             elif instruction.name == "div":
-                self.abstract_variables[instruction.argA] = "(%s/%s)" % (self.abstract_variables[instruction.argA], self.get_abstraction(instruction.argB))
+                if self.abstract_variables[instruction.argA] == 0 or isinstance(self.get_abstraction(instruction.argB), int) and self.get_abstraction(instruction.argB) == 1:
+                    continue
+                elif isinstance(self.abstract_variables[instruction.argA], int) and isinstance(self.get_abstraction(instruction.argB), int):
+                    self.abstract_variables[instruction.argA] //= self.get_abstraction(instruction.argB)
+                else:
+                    self.abstract_variables[instruction.argA] = "(%s/%s)" % (self.abstract_variables[instruction.argA], self.get_abstraction(instruction.argB))
             elif instruction.name == "mod":
-                self.abstract_variables[instruction.argA] = "(%s%%%s)" % (self.abstract_variables[instruction.argA], self.get_abstraction(instruction.argB))
+                if self.abstract_variables[instruction.argA] == 0:
+                    continue
+                elif isinstance(self.abstract_variables[instruction.argA], int) and isinstance(self.get_abstraction(instruction.argB), int):
+                    self.abstract_variables[instruction.argA] %= self.get_abstraction(instruction.argB)
+                else:
+                    self.abstract_variables[instruction.argA] = "(%s%%%s)" % (self.abstract_variables[instruction.argA], self.get_abstraction(instruction.argB))
             elif instruction.name == "eql":
-                self.abstract_variables[instruction.argA] = "(%s==%s)" % (self.abstract_variables[instruction.argA], self.get_abstraction(instruction.argB))
+                if self.abstract_variables[instruction.argA] == self.get_abstraction(instruction.argB):
+                    self.abstract_variables[instruction.argA] = 1
+                elif isinstance(self.abstract_variables[instruction.argA], str) and self.abstract_variables[instruction.argA].startswith("X") and isinstance(self.get_abstraction(instruction.argB), int) and self.get_abstraction(instruction.argB) > 10:
+                    self.abstract_variables[instruction.argA] = 0
+                elif isinstance(self.get_abstraction(instruction.argB), str) and self.get_abstraction(instruction.argB).startswith("X") and isinstance(self.abstract_variables[instruction.argA], int) and self.abstract_variables[instruction.argA] > 10:
+                    self.abstract_variables[instruction.argA] = 0
+                else:
+                    self.abstract_variables[instruction.argA] = "(%s==%s)" % (self.abstract_variables[instruction.argA], self.get_abstraction(instruction.argB))
         
         print(self.abstract_variables)
     
@@ -96,5 +130,5 @@ my_monad = MONAD.from_file("Day 24 input.txt")
 #         print("Found a valid model number: %s" % model_number)
 #         break
 
-# Method 2: Try it myself
+# Method 2: Try it myself (generates too long of a string)
 my_monad.run_as_abstraction()
