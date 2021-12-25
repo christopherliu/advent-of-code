@@ -1,0 +1,95 @@
+#############
+#...........#
+###B#C#A#D###
+  #D#C#B#A#
+  #D#B#A#C#
+  #B#C#D#A#
+  #########
+
+----
+#############
+#...........#
+###B#C#A#D###
+  #D#C#B#A#
+  #D#B#A#C#
+  #B#C#D#A#
+  #########
+
+valid spaces:
+
+H0
+H1
+H3
+H5
+H7
+H9
+H10
+
+A0
+A1
+A2
+A3
+
+B0
+B1
+B2
+B3
+
+C0
+C1
+C2
+C3
+
+D0
+D1
+D2
+D3
+
+valid moves:
+room to hallway
+hallway to room
+
+a literal total of 4*7, 7*4=56 valid moves at any time
+56^22 is the max search space size
+which is technically pretty big
+but most of those moves are probably invalid.
+also, bcda are at the bottom
+so we can't reload without fully emptying a column
+
+----
+
+#############
+#...........#
+###B#C#A#D###
+  #D#C#B#A#
+  #D#B#A#C#
+  #B#C#D#A#
+  #########
+  
+#############
+#A........DA#
+###.#.#.#D###
+  #D#B#C#A#
+  #D#B#C#C#
+  #B#B#C#A#
+  #########
+
+7
+50
+7
+7000
+700
+700
+60
+800
+50
+60
+50
+
+#############
+#AD.......DA#
+###.#.#.#D###
+  #D#B#C#A#
+  #D#B#C#C#
+  #B#B#C#A#
+  #########
