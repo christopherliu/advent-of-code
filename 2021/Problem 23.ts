@@ -1,4 +1,5 @@
 const util = require('util');
+//CMD line: npx tsc; node '.\Problem 23.js'
 
 let debug = false;
 
