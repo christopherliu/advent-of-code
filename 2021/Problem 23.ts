@@ -1,4 +1,3 @@
-// TODO greedily pursue moving amphipods home
 const util = require('util');
 
 let debug = false;
@@ -50,7 +49,8 @@ class Move {
 
 const HALLWAY_OPTIONS = [0, 1, 3, 5, 7, 9, 10].map((x) => new Position("hallway", x, -1));
 const ROOM_OPTIONS = [2, 4, 6, 8].flatMap((x) => [0, 1, 2, 3].map((y) => new Position("rooms", x, y)));
-const ALL_VALID_MOVES = HALLWAY_OPTIONS.flatMap((h) => ROOM_OPTIONS.flatMap((r) => [new Move(h, r), new Move(r, h)]));
+const ALL_HOMEWARD_MOVES = HALLWAY_OPTIONS.flatMap((h) => ROOM_OPTIONS.map((r) => new Move(h, r)));
+const ALL_OUTWARD_MOVES = HALLWAY_OPTIONS.flatMap((h) => ROOM_OPTIONS.map((r) => new Move(r, h)));
 
 class AmphipodBurrowState {
     hallway: Occupant[];
@@ -155,8 +155,13 @@ class AmphipodBurrowState {
 
         return true;
     }
-    getValidMoves(): Move[] {
-        return (ALL_VALID_MOVES).filter((m) => this._isValidMove(m));
+    getAnyHomewardMove(): Move | null {
+        const hm = (ALL_HOMEWARD_MOVES).filter((m) => this._isValidMove(m));
+        if (hm.length > 0) return hm[0];
+        return null;
+    }
+    getOutwardMoves(): Move[] {
+        return (ALL_OUTWARD_MOVES).filter((m) => this._isValidMove(m));
     }
 
     isSolved() {
@@ -178,6 +183,7 @@ class AmphipodBurrowState {
         return abs;
     }
 
+    // TODO greedily pursue moving amphipods home
     /**
      * DFS that looks for cheapest solution.
      * @returns {Move[]} List of moves that solves board most cheaply
@@ -189,8 +195,21 @@ class AmphipodBurrowState {
         //if (cost > 100000) { return null; }
 
         debug && console.log(this.renderBoard());
+
+        const alwaysHelpfulMove = this.getAnyHomewardMove();
+        if (alwaysHelpfulMove) {
+            debug && console.log("Greedily pursuing move", alwaysHelpfulMove.print());
+            const currentCost = this.costOf(alwaysHelpfulMove);
+            const solutionWithMove = this.withMove(alwaysHelpfulMove).findBestSolution(cost + currentCost);
+            if (solutionWithMove !== null) {
+                return {
+                    moves: [alwaysHelpfulMove].concat(solutionWithMove.moves),
+                    cost: currentCost + solutionWithMove.cost
+                };
+            }
+        }
         // console.log("Currently at cost", cost);
-        const allMoves = this.getValidMoves().map((move) => {
+        const allMoves = this.getOutwardMoves().map((move) => {
             debug && console.log("Trying move", move.print());
             const currentCost = this.costOf(move);
             const solutionWithMove = this.withMove(move).findBestSolution(cost + currentCost);
@@ -228,26 +247,33 @@ const maps = {
   #A#B#C#D#
   #A#B#C#D#
   #########`,
-  "almostTrivialCase": `#############
+    "almostTrivialCase": `#############
 #...........#
 ###A#D#C#B###
   #A#B#C#D#
   #A#B#C#D#
   #A#B#C#D#
-  #########`
-};
-const testMap =
-    `#############
+  #########`,
+    "exampleCase": `#############
+ #...........#
+ ###B#C#B#D###
+   #D#C#B#A#
+   #D#B#A#C#
+   #A#D#C#A#
+   #########`,
+   "realProblem": `#############
 #...........#
-###B#C#B#D###
+###B#C#A#D###
   #D#C#B#A#
   #D#B#A#C#
-  #A#D#C#A#
-  #########`;
+  #B#C#D#A#
+  #########`
+};
 
 const args = process.argv;
 if (args.length > 2) debug = true;
 
-const initialState = AmphipodBurrowState.fromString(maps.almostTrivialCase);
+// Don't know why, but it works on realProblem and not exampleCase. Reverse Murphy's law.
+const initialState = AmphipodBurrowState.fromString(maps.realProblem);
 const solution = initialState.findBestSolution();
 console.log(solution);
