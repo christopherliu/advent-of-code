@@ -193,11 +193,29 @@ my_monad = MONAD.from_file("Day 24 input.txt")
 # print(my_monad.compile_to_algebra()["z"])
 
 # Biggest: 99919765949498
-valid_model_numbers = [range(0,9) for _ in range(0, 14)]
+valid_model_numbers = [range(1,9) for _ in range(0, 14)]
+# cursor = 0
+# for model_number in itertools.product(*valid_model_numbers):
+#     # Apply constraints retrieved from analysis
+#     if model_number[1] != 4: continue
+#     if model_number[2] != 8 + model_number[3]: continue
+#     if model_number[4] != 2 + model_number[5]: continue
+#     if model_number[8] < 6: continue
+#     if model_number[9] + 5 != model_number[10]: continue
+    
+#     cursor += 1
+#     if cursor % 1000000 == 0:
+#         print("Progress: Testing %s" % "".join([str(d) for d in model_number]))
+#     if my_monad.is_valid(model_number):
+#         print("Found a valid model number: %s" % "".join([str(d) for d in model_number]))
+#         break
+    
+first_numbers = [2,4,9,1]
+valid_ex_numbers = [range(1,9) for _ in range(0, 10)]
 cursor = 0
-for model_number in itertools.product(*valid_model_numbers):
+for model_number_ex in itertools.product(*valid_ex_numbers):
     # Apply constraints retrieved from analysis
-    if model_number[2] != 8 + model_number[3]: continue
+    model_number = first_numbers + list(model_number_ex)
     if model_number[4] != 2 + model_number[5]: continue
     if model_number[9] + 5 != model_number[10]: continue
     
