@@ -1999,8 +1999,8 @@ input = """149
 8894
 8895"""
 
-depths = map(int, input.split('\n'))
+depths = list(map(int, input.split('\n')))
 
-v = map(lambda i: sum(depths[i+1:i+4]) > sum(depths[i:i+3]), range(0, len(depths)-3))
+v = list(map(lambda i: sum(depths[i+1:i+4]) > sum(depths[i:i+3]), range(0, len(depths)-3)))
 print(depths[1:3])
 print(v.count(True))
